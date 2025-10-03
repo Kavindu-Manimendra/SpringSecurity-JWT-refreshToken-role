@@ -101,13 +101,13 @@ public class JWTServiceImpl implements JWTService {
         return Jwts.parserBuilder().setSigningKey(getSigninKey()).build().parseClaimsJws(token).getBody();
     }
 
-    public boolean isTokenValid(String refreshToken, UserDetails userDetails) {
-        final String userEmail = extractUsername(refreshToken);
-        return (userEmail.equals(userDetails.getUsername()) && !isTokenExpired(refreshToken));
+    public boolean isTokenValid(String accessToken, UserDetails userDetails) {
+        final String userEmail = extractUsername(accessToken);
+        return (userEmail.equals(userDetails.getUsername()) && !isTokenExpired(accessToken));
     }
 
-    private boolean isTokenExpired(String refreshToken) {
-        return extractClaim(refreshToken, Claims::getExpiration).before(new Date());
+    private boolean isTokenExpired(String accessToken) {
+        return extractClaim(accessToken, Claims::getExpiration).before(new Date());
     }
 
     public boolean isRefreshTokenExpired(RefreshToken refreshToken) {

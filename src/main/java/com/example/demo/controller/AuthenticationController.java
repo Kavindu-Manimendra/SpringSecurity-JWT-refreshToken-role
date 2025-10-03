@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(path = "/api/v1/auth")
 @RequiredArgsConstructor
+@CrossOrigin("*")
 public class AuthenticationController {
     @Autowired
     private AuthenticationService authenticationService;
@@ -24,7 +25,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<User> signup(@RequestBody SignUpRequest signUpRequest) {
+    public ResponseEntity<JwtAuthenticationResponse> signup(@RequestBody SignUpRequest signUpRequest) {
         return ResponseEntity.ok(authenticationService.signup(signUpRequest));
     }
 
@@ -45,7 +46,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(@RequestBody NewTokenRequest refreshToken) {
+    public ResponseEntity<JwtAuthenticationResponse> logout(@RequestBody NewTokenRequest refreshToken) {
         return ResponseEntity.ok(authenticationService.logout(refreshToken.getRefreshToken()));
     }
 }
