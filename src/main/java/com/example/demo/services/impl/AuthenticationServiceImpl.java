@@ -1,9 +1,6 @@
 package com.example.demo.services.impl;
 
-import com.example.demo.dtos.JwtAuthenticationResponse;
-import com.example.demo.dtos.NewTokenRequest;
-import com.example.demo.dtos.SignInRequest;
-import com.example.demo.dtos.SignUpRequest;
+import com.example.demo.dtos.*;
 import com.example.demo.entities.RefreshToken;
 import com.example.demo.entities.User;
 import com.example.demo.enums.Role;
@@ -27,7 +24,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final JWTService jwtService;
     private final RefreshTokenRepo refreshTokenRepo;
 
-    public User signup(SignUpRequest signUpRequest) {
+    public JwtAuthenticationResponse signup(SignUpRequest signUpRequest) {
         User user = new User();
         user.setFirstName(signUpRequest.getFirstName());
         user.setLastName(signUpRequest.getLastName());
@@ -35,7 +32,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         user.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
         user.setRole(Role.USER);
 
-        return userRepo.save(user);
+        User newUser = userRepo.save(user);
+
+        UserDto userDto = new UserDto();
+        userDto.setId(newUser.getId().toString());
+
+        JwtAuthenticationResponse response = new JwtAuthenticationResponse();
+        response.setMessage("Registration Successful");
+        response.setUserDto(userDto);
+        return response;
     }
 
     public JwtAuthenticationResponse signin(SignInRequest signinRequest) {
@@ -51,6 +56,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         JwtAuthenticationResponse jwtAuthenticationResponse = new JwtAuthenticationResponse();
         jwtAuthenticationResponse.setToken(jwt);
         jwtAuthenticationResponse.setRefreshToken(refreshToken);
+
+        UserDto userDto = new UserDto();
+        userDto.setId(user.getId().toString());
+        userDto.setFirstName(user.getFirstName());
+        userDto.setLastName(user.getLastName());
+        userDto.setEmail(user.getEmail());
+        userDto.setRoles(user.getRole().toString().split(","));
+        jwtAuthenticationResponse.setUserDto(userDto);
         return jwtAuthenticationResponse;
     }
 
@@ -66,14 +79,27 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         jwtAuthenticationResponse.setMessage("New access token created!!!");
         jwtAuthenticationResponse.setToken(jwt);
         jwtAuthenticationResponse.setRefreshToken(newTokenRequest.getRefreshToken());
+
+        User user = refreshToken.getUser();
+        UserDto userDto = new UserDto();
+        userDto.setId(user.getId().toString());
+        userDto.setFirstName(user.getFirstName());
+        userDto.setLastName(user.getLastName());
+        userDto.setEmail(user.getEmail());
+        userDto.setRoles(user.getRole().toString().split(","));
+        jwtAuthenticationResponse.setUserDto(userDto);
+
         return jwtAuthenticationResponse;
 
     }
 
     @Transactional
-    public String logout(String refreshToken) {
+    public JwtAuthenticationResponse logout(String refreshToken) {
         RefreshToken refreshTokenEntity = refreshTokenRepo.findByRefreshToken(refreshToken).get();
         refreshTokenRepo.delete(refreshTokenEntity);
-        return "Refresh token has been deleted.";
+
+        JwtAuthenticationResponse response = new JwtAuthenticationResponse();
+        response.setMessage("Refresh token has been deleted.");
+        return response;
     }
 }

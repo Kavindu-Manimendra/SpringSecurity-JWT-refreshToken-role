@@ -9,20 +9,23 @@ import com.example.demo.services.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(path = "/api/v1/auth")
 @RequiredArgsConstructor
+@CrossOrigin("*")
 public class AuthenticationController {
     @Autowired
     private AuthenticationService authenticationService;
 
+    @GetMapping
+    public ResponseEntity<String> testing() {
+        return ResponseEntity.ok("testing....");
+    }
+
     @PostMapping("/signup")
-    public ResponseEntity<User> signup(@RequestBody SignUpRequest signUpRequest) {
+    public ResponseEntity<JwtAuthenticationResponse> signup(@RequestBody SignUpRequest signUpRequest) {
         return ResponseEntity.ok(authenticationService.signup(signUpRequest));
     }
 
@@ -43,7 +46,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(@RequestBody NewTokenRequest refreshToken) {
+    public ResponseEntity<JwtAuthenticationResponse> logout(@RequestBody NewTokenRequest refreshToken) {
         return ResponseEntity.ok(authenticationService.logout(refreshToken.getRefreshToken()));
     }
 }
